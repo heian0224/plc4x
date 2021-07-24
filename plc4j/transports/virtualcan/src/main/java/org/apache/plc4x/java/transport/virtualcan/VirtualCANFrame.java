@@ -16,35 +16,46 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.plc4x.java.transport.socketcan;
+package org.apache.plc4x.java.transport.virtualcan;
 
-import org.apache.plc4x.java.api.exceptions.PlcRuntimeException;
-import org.apache.plc4x.java.socketcan.readwrite.SocketCANFrame;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.plc4x.java.spi.generation.Message;
 import org.apache.plc4x.java.spi.generation.MessageIO;
-import org.apache.plc4x.java.spi.generation.ParseException;
-import org.apache.plc4x.java.spi.generation.WriteBufferByteBased;
-import org.apache.plc4x.java.transport.can.CANFrameBuilder;
+import org.apache.plc4x.java.transport.virtualcan.io.VirtualCANFrameIO;
 
-public class SocketCANFrameBuilder implements CANFrameBuilder<SocketCANFrame> {
+public class VirtualCANFrame implements Message {
+    private final int nodeId;
+    private final byte[] data;
 
-    private int nodeId;
-    private byte[] data;
-
-    @Override
-    public CANFrameBuilder<SocketCANFrame> withId(int nodeId) {
+    public VirtualCANFrame(int nodeId, byte[] data) {
         this.nodeId = nodeId;
-        return this;
-    }
-
-    @Override
-    public CANFrameBuilder<SocketCANFrame> withData(byte[] data) {
         this.data = data;
-        return this;
+    }
+
+    public int getNodeId() {
+        return nodeId;
+    }
+
+    public byte[] getData() {
+        return data;
     }
 
     @Override
-    public SocketCANFrame create() throws PlcRuntimeException {
-        return new SocketCANFrame(nodeId, data);
+    public int getLengthInBytes() {
+        return 0;
+    }
+
+    @Override
+    public int getLengthInBits() {
+        return 0;
+    }
+
+    @Override
+    public MessageIO<? extends Message, ? extends Message> getMessageIO() {
+        return VirtualCANFrameIO.INSTANCE;
+    }
+
+    public String toString() {
+        return "VirtualCANFrame " + nodeId + "[" + data.length + "]" + Hex.encodeHexString(data);
     }
 }

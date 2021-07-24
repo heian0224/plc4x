@@ -16,21 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.plc4x.java.can.adapter;
+package org.apache.plc4x.java.can.generic.context;
 
-import org.apache.plc4x.java.spi.ConversationContext;
-import org.apache.plc4x.java.spi.Plc4xProtocolBase;
+import org.apache.plc4x.java.spi.context.DriverContext;
 
-/**
- * Small parent to declare base type for CAN protocols.
- *
- * @param <T> Type of wire message.
- */
-public abstract class Plc4xCANProtocolBase<T> extends Plc4xProtocolBase<T> {
-
-    @Override
-    public void decode(ConversationContext<T> context, T msg) throws Exception {
-        super.decode(context, msg);
-    }
-
+public class GenericCANDriverContext implements DriverContext {
 }

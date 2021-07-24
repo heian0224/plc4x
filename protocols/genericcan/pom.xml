@@ -8,7 +8,7 @@
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing,
   software distributed under the License is distributed on an
@@ -23,27 +23,21 @@
 
   <parent>
     <groupId>org.apache.plc4x</groupId>
-    <artifactId>plc4j</artifactId>
+    <artifactId>plc4x-protocols</artifactId>
     <version>0.9.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>plc4j-transports</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>plc4x-protocols-genericcan</artifactId>
 
-  <name>PLC4J: Transports</name>
-  <description>Collection of base-types for implementing different types of drivers.</description>
+  <name>Protocols: Generic CAN</name>
+  <description>Protocol specifications for the Generic CAN protocol.</description>
 
-  <modules>
-    <module>can</module>
-    <module>pcap-replay</module>
-    <module>pcap-shared</module>
-    <module>raw-socket</module>
-    <module>socketcan</module>
-    <module>serial</module>
-    <module>tcp</module>
-    <module>udp</module>
-    <module>virtualcan</module>
-    <module>test</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.plc4x</groupId>
+      <artifactId>plc4x-code-generation-protocol-base-mspec</artifactId>
+      <version>0.9.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
 
 </project>

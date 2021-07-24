@@ -16,35 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.plc4x.java.transport.socketcan;
+package org.apache.plc4x.java.can.generic.transport;
 
-import org.apache.plc4x.java.api.exceptions.PlcRuntimeException;
-import org.apache.plc4x.java.socketcan.readwrite.SocketCANFrame;
-import org.apache.plc4x.java.spi.generation.Message;
-import org.apache.plc4x.java.spi.generation.MessageIO;
-import org.apache.plc4x.java.spi.generation.ParseException;
-import org.apache.plc4x.java.spi.generation.WriteBufferByteBased;
+import java.util.function.Supplier;
+import org.apache.plc4x.java.spi.generation.*;
 import org.apache.plc4x.java.transport.can.CANFrameBuilder;
+import org.apache.plc4x.java.transport.can.CANTransport;
+import org.apache.plc4x.java.transport.can.FrameData;
 
-public class SocketCANFrameBuilder implements CANFrameBuilder<SocketCANFrame> {
+public class GenericCANFrameDataHandler implements CANTransport.FrameHandler<Message, GenericFrame> {
 
-    private int nodeId;
-    private byte[] data;
+    private final Supplier<CANFrameBuilder<Message>> frameBuilder;
 
-    @Override
-    public CANFrameBuilder<SocketCANFrame> withId(int nodeId) {
-        this.nodeId = nodeId;
-        return this;
+    public GenericCANFrameDataHandler(Supplier<CANFrameBuilder<Message>> frameBuilder) {
+        this.frameBuilder = frameBuilder;
     }
 
     @Override
-    public CANFrameBuilder<SocketCANFrame> withData(byte[] data) {
-        this.data = data;
-        return this;
+    public GenericFrame fromCAN(FrameData frame) {
+        return new GenericFrame(frame.getNodeId(), frame.getData());
     }
 
     @Override
-    public SocketCANFrame create() throws PlcRuntimeException {
-        return new SocketCANFrame(nodeId, data);
+    public Message toCAN(GenericFrame frame) {
+        return frameBuilder.get().withId(frame.getNodeId())
+            .withData(frame.getData())
+            .create();
     }
+
 }

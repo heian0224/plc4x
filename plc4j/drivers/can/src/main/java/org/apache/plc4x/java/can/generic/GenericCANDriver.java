@@ -16,18 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.plc4x.java.canopen;
+package org.apache.plc4x.java.can.generic;
 
 import org.apache.plc4x.java.api.exceptions.PlcRuntimeException;
-import org.apache.plc4x.java.api.model.PlcField;
-import org.apache.plc4x.java.api.value.PlcValue;
 import org.apache.plc4x.java.api.value.PlcValueHandler;
 import org.apache.plc4x.java.can.adapter.CANDriverAdapter;
-import org.apache.plc4x.java.canopen.configuration.CANOpenConfiguration;
-import org.apache.plc4x.java.canopen.context.CANOpenDriverContext;
-import org.apache.plc4x.java.canopen.field.CANOpenFieldHandler;
-import org.apache.plc4x.java.canopen.protocol.CANOpenProtocolLogic;
-import org.apache.plc4x.java.canopen.transport.CANOpenFrameDataHandler;
+import org.apache.plc4x.java.can.generic.configuration.GenericCANConfiguration;
+import org.apache.plc4x.java.can.generic.context.GenericCANDriverContext;
+import org.apache.plc4x.java.can.generic.field.GenericCANFieldHandler;
+import org.apache.plc4x.java.can.generic.protocol.GenericCANProtocolLogic;
+import org.apache.plc4x.java.can.generic.transport.GenericCANFrameDataHandler;
 import org.apache.plc4x.java.spi.configuration.Configuration;
 import org.apache.plc4x.java.spi.configuration.ConfigurationFactory;
 import org.apache.plc4x.java.spi.connection.CustomProtocolStackConfigurer;
@@ -35,34 +33,35 @@ import org.apache.plc4x.java.spi.connection.GeneratedDriverBase;
 import org.apache.plc4x.java.spi.connection.ProtocolStackConfigurer;
 import org.apache.plc4x.java.spi.generation.Message;
 import org.apache.plc4x.java.spi.optimizer.BaseOptimizer;
-import org.apache.plc4x.java.spi.optimizer.SingleFieldOptimizer;
 import org.apache.plc4x.java.spi.transport.Transport;
 import org.apache.plc4x.java.spi.values.IEC61131ValueHandler;
-import org.apache.plc4x.java.spi.values.PlcList;
 import org.apache.plc4x.java.transport.can.CANTransport;
 
 /**
+ * A generic purpose CAN driver which is able to work with any compatible CAN transport.
+ *
+ * Main role of this driver is provisioning of quick and easy way to create user specific CAN bus applications.
  */
-public class CANOpenPlcDriver extends GeneratedDriverBase<Message> {
+public class GenericCANDriver extends GeneratedDriverBase<Message> {
 
     @Override
     public String getProtocolCode() {
-        return "canopen";
+        return "genericcan";
     }
 
     @Override
     public String getProtocolName() {
-        return "CAN open";
+        return "Generic CAN";
     }
 
     @Override
     protected Class<? extends Configuration> getConfigurationType() {
-        return CANOpenConfiguration.class;
+        return GenericCANConfiguration.class;
     }
 
     @Override
     protected boolean canRead() {
-        return true;
+        return false;
     }
 
     @Override
@@ -81,21 +80,13 @@ public class CANOpenPlcDriver extends GeneratedDriverBase<Message> {
     }
 
     @Override
-    protected CANOpenFieldHandler getFieldHandler() {
-        return new CANOpenFieldHandler();
+    protected GenericCANFieldHandler getFieldHandler() {
+        return new GenericCANFieldHandler();
     }
 
     @Override
     protected PlcValueHandler getValueHandler() {
-        return new IEC61131ValueHandler() {
-            @Override
-            public PlcValue newPlcValue(PlcField field, Object[] values) {
-                if (values[0] instanceof PlcList) {
-                    return (PlcList) values[0];
-                }
-                return super.newPlcValue(field, values);
-            }
-        };
+        return new IEC61131ValueHandler();
     }
 
     /**
@@ -109,32 +100,32 @@ public class CANOpenPlcDriver extends GeneratedDriverBase<Message> {
 
     @Override
     protected BaseOptimizer getOptimizer() {
-        return new SingleFieldOptimizer();
+        return null;
     }
 
     @Override
     protected ProtocolStackConfigurer<Message> getStackConfigurer() {
-        throw new PlcRuntimeException("CANopen driver requires access to transport layer.");
+        throw new PlcRuntimeException("Generic CAN driver requires access to transport layer.");
     }
 
     @Override
     protected ProtocolStackConfigurer<Message> getStackConfigurer(Transport transport) {
         if (!(transport instanceof CANTransport)) {
-            throw new PlcRuntimeException("CANopen driver requires a CAN transport instance");
+            throw new PlcRuntimeException("Generic CAN Driver requires CAN Transport instance");
         }
 
-        final CANTransport<Message> canTransport = (CANTransport<Message>) transport;
+        CANTransport<Message> canTransport = (CANTransport<Message>) transport;
         return CustomProtocolStackConfigurer.builder(canTransport.getMessageType(), canTransport::getMessageIO)
             .withProtocol(cfg -> {
-                CANOpenProtocolLogic protocolLogic = new CANOpenProtocolLogic();
+                GenericCANProtocolLogic protocolLogic = new GenericCANProtocolLogic();
                 ConfigurationFactory.configure(cfg, protocolLogic);
                 return new CANDriverAdapter<>(protocolLogic,
                     canTransport.getMessageType(), canTransport.adapter(),
-                    new CANOpenFrameDataHandler(canTransport::getTransportFrameBuilder)
+                    new GenericCANFrameDataHandler(() -> canTransport.getTransportFrameBuilder())
                 );
             })
-            .withDriverContext(cfg -> new CANOpenDriverContext())
-            .withPacketSizeEstimator(configuration1 -> canTransport.getEstimator())
+            .withDriverContext(cfg -> new GenericCANDriverContext())
+            .withPacketSizeEstimator(cfg -> canTransport.getEstimator())
             .littleEndian()
             .build();
     }

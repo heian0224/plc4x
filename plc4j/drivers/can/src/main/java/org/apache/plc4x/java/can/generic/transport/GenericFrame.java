@@ -16,21 +16,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.plc4x.java.can.adapter;
+package org.apache.plc4x.java.can.generic.transport;
 
-import org.apache.plc4x.java.spi.ConversationContext;
-import org.apache.plc4x.java.spi.Plc4xProtocolBase;
+import org.apache.plc4x.java.spi.generation.Message;
+import org.apache.plc4x.java.spi.generation.MessageIO;
 
-/**
- * Small parent to declare base type for CAN protocols.
- *
- * @param <T> Type of wire message.
- */
-public abstract class Plc4xCANProtocolBase<T> extends Plc4xProtocolBase<T> {
+public class GenericFrame implements Message {
+
+    private final int nodeId;
+    private final byte[] data;
+
+    public GenericFrame(int nodeId, byte[] data) {
+        this.nodeId = nodeId;
+        this.data = data;
+    }
+
+    public int getNodeId() {
+        return nodeId;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
 
     @Override
-    public void decode(ConversationContext<T> context, T msg) throws Exception {
-        super.decode(context, msg);
+    public int getLengthInBytes() {
+        return 0;
+    }
+
+    @Override
+    public int getLengthInBits() {
+        return 0;
+    }
+
+    @Override
+    public MessageIO<? extends Message, ? extends Message> getMessageIO() {
+        return null;
     }
 
 }
